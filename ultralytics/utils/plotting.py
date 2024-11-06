@@ -341,7 +341,7 @@ class Annotator:
         if self.pil or not is_ascii(label):
             if rotated:
                 p1 = box[0]
-                self.draw.polygon([tuple(b) for b in box], width=self.lw, outline=color)  # PIL requires tuple box
+                self.draw.polygon([tuple(b) for b in box], outline=color)  # PIL requires tuple box
             else:
                 p1 = (box[0], box[1])
                 self.draw.rectangle(box, width=self.lw, outline=color)  # box
