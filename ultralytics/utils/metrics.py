@@ -704,7 +704,8 @@ class Metric(SimpleClass):
         Returns:
             (float): The mAP at an IoU threshold of 0.5.
         """
-        return self.all_ap[:, 0].mean() if len(self.all_ap) else 0.0
+        #return self.all_ap[:, 0].mean() if len(self.all_ap) else 0.0
+        return self.all_ap[:, 5].mean() if len(self.all_ap) else 0.0
 
     @property
     def map75(self):
@@ -724,7 +725,12 @@ class Metric(SimpleClass):
         Returns:
             (float): The mAP over IoU thresholds of 0.5 - 0.95 in steps of 0.05.
         """
-        return self.all_ap.mean() if len(self.all_ap) else 0.0
+        #return self.all_ap.mean() if len(self.all_ap) else 0.0
+        return self.all_ap[:,5:].mean() if len(self.all_ap) else 0.0 #使用map75-95替代
+
+    
+    def map75_95(self): #map75-95
+        return self.all_ap[:,5:].mean() if len(self.all_ap) else 0.0 
 
     def mean_results(self):
         """Mean of results, return mp, mr, map50, map."""
