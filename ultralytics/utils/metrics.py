@@ -665,6 +665,16 @@ class Metric(SimpleClass):
             (np.ndarray, list): Array of shape (nc,) with AP50 values per class, or an empty list if not available.
         """
         return self.all_ap[:, 0] if len(self.all_ap) else []
+    
+    @property
+    def ap75(self):
+        """
+        Returns the Average Precision (AP) at an IoU threshold of 0.5 for all classes.
+
+        Returns:
+            (np.ndarray, list): Array of shape (nc,) with AP50 values per class, or an empty list if not available.
+        """
+        return self.all_ap[:, 5] if len(self.all_ap) else []
 
     @property
     def ap(self):
@@ -704,8 +714,8 @@ class Metric(SimpleClass):
         Returns:
             (float): The mAP at an IoU threshold of 0.5.
         """
-        #return self.all_ap[:, 0].mean() if len(self.all_ap) else 0.0
-        return self.all_ap[:, 5].mean() if len(self.all_ap) else 0.0
+        return self.all_ap[:, 0].mean() if len(self.all_ap) else 0.0
+        #return self.all_ap[:, 5].mean() if len(self.all_ap) else 0.0
 
     @property
     def map75(self):
@@ -725,8 +735,8 @@ class Metric(SimpleClass):
         Returns:
             (float): The mAP over IoU thresholds of 0.5 - 0.95 in steps of 0.05.
         """
-        #return self.all_ap.mean() if len(self.all_ap) else 0.0
-        return self.all_ap[:,5:].mean() if len(self.all_ap) else 0.0 #使用map75-95替代
+        return self.all_ap.mean() if len(self.all_ap) else 0.0
+        #return self.all_ap[:,5:].mean() if len(self.all_ap) else 0.0 #使用map75-95替代
 
     
     def map75_95(self): #map75-95
@@ -734,11 +744,11 @@ class Metric(SimpleClass):
 
     def mean_results(self):
         """Mean of results, return mp, mr, map50, map."""
-        return [self.mp, self.mr, self.map50, self.map]
+        return [self.mp, self.mr, self.map50,self.map75, self.map]
 
     def class_result(self, i):
         """Class-aware result, return p[i], r[i], ap50[i], ap[i]."""
-        return self.p[i], self.r[i], self.ap50[i], self.ap[i]
+        return self.p[i], self.r[i], self.ap50[i],self.ap75[i], self.ap[i]
 
     @property
     def maps(self):
@@ -750,7 +760,7 @@ class Metric(SimpleClass):
 
     def fitness(self):
         """Model fitness as a weighted combination of metrics."""
-        w = [0.0, 0.0, 0.1, 0.9]  # weights for [P, R, mAP@0.5, mAP@0.5:0.95]
+        w = [0.0, 0.0, 0.1, 0.0, 0.9]  # weights for [P, R, mAP@0.5, mAP@0.5:0.95]
         return (np.array(self.mean_results()) * w).sum()
 
     def update(self, results):
@@ -858,7 +868,7 @@ class DetMetrics(SimpleClass):
     @property
     def keys(self):
         """Returns a list of keys for accessing specific metrics."""
-        return ["metrics/precision(B)", "metrics/recall(B)", "metrics/mAP50(B)", "metrics/mAP50-95(B)"]
+        return ["metrics/precision(B)", "metrics/recall(B)", "metrics/mAP50(B)","metrics/mAP75(B)", "metrics/mAP50-95(B)"]
 
     def mean_results(self):
         """Calculate mean of detected objects & return precision, recall, mAP50, and mAP50-95."""
@@ -984,6 +994,7 @@ class SegmentMetrics(SimpleClass):
             "metrics/precision(B)",
             "metrics/recall(B)",
             "metrics/mAP50(B)",
+            "metrics/mAP75(B)",
             "metrics/mAP50-95(B)",
             "metrics/precision(M)",
             "metrics/recall(M)",
@@ -1125,6 +1136,7 @@ class PoseMetrics(SegmentMetrics):
             "metrics/precision(B)",
             "metrics/recall(B)",
             "metrics/mAP50(B)",
+            "metrics/mAP75(B)",
             "metrics/mAP50-95(B)",
             "metrics/precision(P)",
             "metrics/recall(P)",
@@ -1256,7 +1268,7 @@ class OBBMetrics(SimpleClass):
     @property
     def keys(self):
         """Returns a list of keys for accessing specific metrics."""
-        return ["metrics/precision(B)", "metrics/recall(B)", "metrics/mAP50(B)", "metrics/mAP50-95(B)"]
+        return ["metrics/precision(B)", "metrics/recall(B)", "metrics/mAP50(B)","metrics/mAP75(B)", "metrics/mAP50-95(B)"]
 
     def mean_results(self):
         """Calculate mean of detected objects & return precision, recall, mAP50, and mAP50-95."""
